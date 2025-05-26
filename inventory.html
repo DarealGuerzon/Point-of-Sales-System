@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Point of Sales System</title>
+    <link rel="stylesheet" href="styles.css">
+    
+</head>
+<body>
+    <h1>My Simple POS</h1> 
+    
+    <nav>
+        <div>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="add-product.html">Add Products</a></li>
+                <li><a href="inventory.html">Inventory</a></li>
+                <li><a href="sales-report.html">Sales</a></li>
+            </ul>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                </tr>
+            </thead>
+            <tbody id="inventoryTable"></tbody>
+        </table> 
+    </nav>
+
+    <script>
+    window,addEventListener('DOMContentLoaded', () => {
+        const table = document.getElementById('inventoryTable');
+        const products = JSON.parse(localStorage.getItem('products')) || [];
+
+        products.forEach(product => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${product.name}</td>
+                <td>${product.category}</td>
+                <td>${product.price}</td>
+                <td>${product.quantity}</td>
+            `;
+
+            table.appendChild(row);
+        });
+    });
+    </script>
+</body>
+</html>

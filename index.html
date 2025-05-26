@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Point of Sales System</title>
+    <link rel="stylesheet" href="styles.css">
+     <!-- <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --background-color: #f5f6fa;
+            --text-color: #2c3e50;
+            --card-background: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        nav {
+            background-color: var(--primary-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        nav a:hover {
+            background-color: var(--secondary-color);
+        }
+
+        section {
+            background-color: var(--card-background);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        #productList {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        .product-card {
+            background-color: var(--card-background);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 5px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        button.delete {
+            background-color: var(--accent-color);
+        }
+
+        button.delete:hover {
+            background-color: #c0392b;
+        }
+
+        #cartItems {
+            margin: 20px 0;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        #printReceiptBtn {
+            background-color: var(--primary-color);
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1em;
+            margin-top: 20px;
+        }
+
+        #printReceiptBtn:hover {
+            background-color: #34495e;
+        }
+
+        #totalPrice {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+    </style> -->
+    
+</head>
+<body>
+    <h1>My Simple POS</h1> 
+    
+    <nav>
+        <div>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="add-product.html">Add Products</a></li>
+                <li><a href="inventory.html">Inventory</a></li>
+                <li><a href="sales-report.html">Sales</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section>
+        <h2>Product List</h2>
+        <div id="productList"></div>
+    </section>
+
+    <section>
+        <h2>Cart</h2>
+        <div id="cartItems"></div>
+        <h3>Total: PHP<span id="totalPrice">0.00</span></h3>
+        <button id="printReceiptBtn">Print Receipt</button>
+    </section>
+    
+    <script>
+        
+    let cart = [];
+
+    function updateProductList(){
+        const productListDiv = document.getElementById('productList');
+        productListDiv.innerHTML = ''; // Clear existing list
+
+        const products = JSON.parse(localStorage.getItem('products')) || [];
+
+        if (products.length === 0) {
+            productListDiv.innerHTML = '<p>No products available.</p>';
+            return;
+        }
+
+        products.forEach((product, index) => {
+            const productCard = document.createElement('div');
+            
+            productCard.innerHTML = `
+                <h3>${product.name}</h3>
+                <img src="${product.image}" alt="${product.name}" width="100" />
+                <p><strong>Price:</strong> ₱${product.price}</p>
+                <p><strong>Quantity:</strong> ${product.quantity}</p>
+                <p><strong>Category:</strong> ${product.category}</p>
+                <button onclick="editProduct(${index})">Edit</button>
+                <button onclick="deleteProduct(${index})">Delete</button>
+                <button onclick="addToCart(${index})">Add to Cart</button>
+            `;
+
+            productListDiv.appendChild(productCard);
+        });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        updateProductList();
+        renderCart();
+    });
+
+    function deleteProduct(index) {
+        let products = JSON.parse(localStorage.getItem('products')) || [];
+        products.splice(index, 1);
+        localStorage.setItem('products', JSON.stringify(products));
+        window.location.reload(); // Refresh the page to show updated list
+    }
+
+    function editProduct(index) {
+        let products = JSON.parse(localStorage.getItem('products')) || [];
+        const product = products[index];
+
+        // Simple prompt approach (for demo). You can later build a modal or redirect.
+        const newName = prompt('Enter new name', product.name);
+        const newPrice = prompt('Enter new price', product.price);
+        const newQuantity = prompt('Enter new quantity', product.quantity);
+        const newCategory = prompt('Enter new category', product.category);
+
+        if (newName && newPrice && newQuantity && newCategory) {
+            products[index] = {
+                ...product,
+                name: newName,
+                price: newPrice,
+                quantity: newQuantity,
+                category: newCategory
+            };
+
+            localStorage.setItem('products', JSON.stringify(products));
+            window.location.reload(); // Refresh to reflect changes
+        }
+    }
+    function addToCart(productIndex) {
+        let products = JSON.parse(localStorage.getItem('products')) || [];
+        const product = products[productIndex];
+
+        if (product.quantity <= 0) {
+            alert('Product is out of stock!');
+            return;
+        }
+        const cartItemIndex = cart.findIndex(item => item.name === product.name);
+
+        if (cartItemIndex > -1) {
+            cart[cartItemIndex].quantity += 1;
+        } else {
+            cart.push({
+                name: product.name,
+                price: Number(product.price),
+                quantity: 1,
+                image: product.image,
+                category: product.category,
+            });
+        }
+        products[productIndex].quantity -= 1; // Decrease product quantity
+        localStorage.setItem('products', JSON.stringify(products));
+
+        renderCart();
+        updateProductList();
+      
+    }
+
+    function renderCart(){
+        const cartItemsDiv = document.getElementById('cartItems');
+        const totalPriceSpan = document.getElementById('totalPrice');
+
+        cartItemsDiv.innerHTML = '';
+
+        if (cart.length === 0) {
+            cartItemsDiv.innerHTML = '<p>No items in cart.</p>';
+            totalPriceSpan.innerText = '0.00';
+            return;
+        }
+        let total = 0;
+
+        cart.forEach((item,index)=> {
+            const itemTotal = item.price * item.quantity;
+            total += itemTotal;
+
+            const itemDiv = document.createElement('div');
+            itemDiv.innerHTML =`
+            <p>
+                <strong>${item.name}</strong> - ₱${item.price} x ${item.quantity} = ₱${itemTotal.toFixed(2)}
+                <button onclick="removeFromCart(${index})">Remove</button>
+            </p>
+            `;
+        cartItemsDiv.appendChild(itemDiv);
+        });
+        totalPriceSpan.innerText = total.toFixed(2);
+    }
+
+    function removeFromCart(index){
+        let products = JSON.parse(localStorage.getItem('products')) || [];
+        const itemToRemove = cart[index]; // --- CORRECTED: Use a new variable for the item being removed ---
+
+        // --- CORRECTED: Find the product in the inventory based on the itemToRemove's name ---
+        const productInInventoryIndex = products.findIndex(p => p.name === itemToRemove.name); 
+
+        if (cart[index].quantity > 1) {
+            cart[index].quantity -= 1; 
+            if (productInInventoryIndex > -1) {
+                products[productInInventoryIndex].quantity += 1; // Increase product quantity in inventory by 1
+            }
+        } else {
+            // If the last item of a type is removed from the cart
+            cart.splice(index, 1); // Remove item completely from cart
+            if (productInInventoryIndex > -1) {
+                // --- CORRECTED: Add back the full quantity of the item that was removed from cart ---
+                products[productInInventoryIndex].quantity += itemToRemove.quantity; 
+            }
+        }
+
+        localStorage.setItem('products', JSON.stringify(products)); // Save updated products
+        renderCart();
+        updateProductList(); // Update product list to reflect inventory changes
+    }
+
+        document.getElementById("printReceiptBtn").addEventListener("click", () => {
+        if (cart.length === 0) {
+            alert("Cart is empty, nothing to print.");
+            return;
+        }
+
+        let receiptWindow = window.open("", "Print Receipt", "width=400,height=600");
+        receiptWindow.document.write("<h2>Receipt</h2>");
+        receiptWindow.document.write("<hr>");
+
+        let total = 0;
+
+        cart.forEach((item) => {
+            const itemTotal = item.price * item.quantity;
+            total += itemTotal;
+            receiptWindow.document.write(
+                `<p>${item.name} - ₱${item.price} x ${item.quantity} = ₱${itemTotal.toFixed(2)}</p>`
+            );
+        });
+
+        receiptWindow.document.write("<hr>");
+        receiptWindow.document.write(`<h3>Total: PHP ${total.toFixed(2)}</h3>`);
+        receiptWindow.document.write("<p>Thank you for your purchase!</p>");
+
+        receiptWindow.document.close();
+        receiptWindow.focus();
+        receiptWindow.print();
+       
+        //store total sales per day
+        const today = new Date().toLocaleDateString();
+        let sales = JSON.parse(localStorage.getItem('sales')) || {};
+        if (!sales[today]) {
+            sales[today] = 0;
+        }
+        sales[today] += total;
+        localStorage.setItem('sales', JSON.stringify(sales));
+        cart = []; // Clear cart after printing
+        updateCart();
+    });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Point of Sales System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>My Simple POS</h1> 
+    
+    <nav>
+        <div>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="add-product.html">Add Products</a></li>
+                <li><a href="inventory.html">Inventory</a></li>
+                <li><a href="sales-report.html">Sales</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div>
+        <h2>Sales Report</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Total Sales (PHP)</th>
+                </tr>
+            </thead>
+            <tbody id="salesReportTable"></tbody>
+            <tfoot>
+                <tr>
+                    <td>Overall Total:</td>
+                    <td id="overallTotalSales">PHP 0.00</td>
+                </tr>
+            </tfoot>
+        </table>
+        <p id="noSalesMessage" style="display: none; color: gray;">No sales recorded yet.</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => { // Ensure script runs after DOM is loaded
+            const sales = JSON.parse(localStorage.getItem('sales')) || {};
+            const salesReportTableBody = document.getElementById('salesReportTable'); // Targeting the tbody
+            const overallTotalSalesElement = document.getElementById('overallTotalSales'); // New element for overall total
+            const noSalesMessage = document.getElementById('noSalesMessage'); // New element for no sales message
+
+            let overallTotal = 0; // Initialize overall total
+
+            if (Object.keys(sales).length === 0) {
+                noSalesMessage.style.display = "block"; // Show "No sales" message
+                salesReportTableBody.innerHTML = ""; // Ensure table body is empty
+                overallTotalSalesElement.textContent = "PHP 0.00"; // Set overall total to zero
+            } else {
+                noSalesMessage.style.display = "none"; // Hide "No sales" message if there's data
+
+                // Get dates and sort them for a chronological report
+                const sortedDates = Object.keys(sales).sort((a, b) => {
+                    // This assumes toLocaleDateString() creates a simple M/D/YYYY or MM/DD/YYYY format
+                    // For more robust sorting, consider storing dates as YYYY-MM-DD or Unix timestamps
+                    const dateA = new Date(a);
+                    const dateB = new Date(b);
+                    return dateA - dateB;
+                });
+
+                sortedDates.forEach(date => {
+                    const totalSalesForDay = sales[date];
+                    overallTotal += totalSalesForDay; // Add to overall total
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${date}</td>
+                        <td>₱${totalSalesForDay.toFixed(2)}</td>
+                    `;
+                    salesReportTableBody.appendChild(row);
+                });
+
+                overallTotalSalesElement.textContent = `PHP ${overallTotal.toFixed(2)}`; // Display overall total
+            }
+        });
+    </script>
+</body>
+</html>
